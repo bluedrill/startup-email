@@ -1,0 +1,42 @@
+#---------------------------------#
+#      general configuration      #
+#---------------------------------#
+
+# version format
+version: 1.0.{build}
+
+# branches to build
+branches:
+  # whitelist
+  only:
+    - master
+
+# Do not build on tags
+skip_tags: true
+
+#---------------------------------#
+#    environment configuration    #
+#---------------------------------#
+
+environment:
+  GitHubKey:
+    secure: AYCqIjYRtGo9Sa3J9RQREPwICRjTT0nNCO+87sV9bbZZxqSbZnJpWN461fynib1o
+    
+image: ubuntu
+
+build_script:
+  - sh: echo tar -C ${APPVEYOR_BUILD_FOLDER} -czvf ${APPVEYOR_PROJECT_NAME}-${APPVEYOR_BUILD_VERSION}.tar.gz --transform "s/src/${APPVEYOR_PROJECT_NAME}-${APPVEYOR_BUILD_VERSION}/" src/
+  - sh: tar -C ${APPVEYOR_BUILD_FOLDER} -czvf ${APPVEYOR_PROJECT_NAME}-${APPVEYOR_BUILD_VERSION}.tar.gz --transform "s/src/${APPVEYOR_PROJECT_NAME}-${APPVEYOR_BUILD_VERSION}/" src/
+  - sh: echo appveyor PushArtifact -Path "${APPVEYOR_BUILD_FOLDER}/${APPVEYOR_PROJECT_NAME}-${APPVEYOR_BUILD_VERSION}.tar.gz"
+  - sh: appveyor PushArtifact -Path "${APPVEYOR_BUILD_FOLDER}/${APPVEYOR_PROJECT_NAME}-${APPVEYOR_BUILD_VERSION}.tar.gz"
+
+deploy:
+# Deploy to GitHub Releases
+  - provider: GitHub
+    release: v$(APPVEYOR_BUILD_VERSION)
+    auth_token: $(GitHubKey)
+    artifact: /.*\.tar.gz/
+    draft: false
+    prerelease: false
+    on:
+      branch: master

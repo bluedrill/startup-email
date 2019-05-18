@@ -1,0 +1,12 @@
+[Unit]
+Description=Start Up Email
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/startup-email
+RemainAfterExit=false
+StandardOutput=journal
+
+[Install]
+WantedBy=multi-user.target
